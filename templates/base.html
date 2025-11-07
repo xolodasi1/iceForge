@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - IceForge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans&display=swap" rel="stylesheet">
+</head>
+<body>
+<header>
+    <div class="container">
+        <a href="{{ url_for('index') }}" class="logo">IceForge</a>
+        <nav>
+            <a href="{{ url_for('index') }}">Каталог модов</a>
+            <a href="{{ url_for('upload_page') }}">Загрузить мод</a>
+            {% if session.username %}
+            <a href="{{ url_for('account') }}">Мой аккаунт</a>
+            <span class="user-greeting">Привет, {{ session.username }}!</span>
+            <a href="{{ url_for('logout') }}">Выйти</a>
+            {% else %}
+            <a href="{{ url_for('login') }}">Вход</a>
+            <a href="{{ url_for('register') }}">Регистрация</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <p class="flash-message">{{ message }}</p>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</main>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2023 IceForge. Все моды принадлежат их авторам.</p>
+    </div>
+</footer>
+</body>
+</html>

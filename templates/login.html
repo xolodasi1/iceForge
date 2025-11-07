@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<h1>Вход в аккаунт</h1>
+<form action="{{ url_for('login') }}" method="post" class="upload-form">
+    <label for="username">Имя пользователя:</label>
+    <input type="text" id="username" name="username" required>
+
+    <label for="password">Пароль:</label>
+    <input type="password" id="password" name="password" required>
+
+    <button type="submit" class="btn">Войти</button>
+</form>
+{% endblock %}

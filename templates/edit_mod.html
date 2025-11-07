@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Редактировать мод{% endblock %}
+{% block content %}
+<div class="form-card">
+    <h1>Редактирование мода: {{ mod.name }}</h1>
+
+    <!-- ВАЖНО: добавлен enctype для загрузки файлов -->
+    <form action="{{ url_for('edit_mod', mod_id=mod.id) }}" method="post" enctype="multipart/form-data" class="upload-form">
+
+        <label for="mod_name">Название мода:</label>
+        <input type="text" id="mod_name" name="mod_name" value="{{ mod.name }}" required>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="mod_version">Версия Minecraft:</label>
+                <select id="mod_version" name="mod_version" required>
+                    <!-- Устанавливаем текущую версию как выбранную -->
+                    <option value="{{ mod.version }}" selected>{{ mod.version }}</option>
+                    <option value="1.20.1">1.20.1</option>
+                    <option value="1.19.4">1.19.4</option>
+                    <option value="1.19.2">1.19.2</option>
+                    <option value="1.18.2">1.18.2</option>
+                    <option value="1.16.5">1.16.5</option>
+                    <option value="1.12.2">1.12.2</option>
+                    <option value="1.7.10">1.7.10</option>
+                </select>
+            </div>
+            <!-- НОВЫЕ ПОЛЯ ДЛЯ РЕДАКТИРОВАНИЯ -->
+            <div class="form-group">
+                <label for="mod_loader">Загрузчик:</label>
+                <select id="mod_loader" name="mod_loader" required>
+                    <option value="Forge" {% if mod.get('loader') == 'Forge' %}selected{% endif %}>Forge</option>
+                    <option value="Fabric" {% if mod.get('loader') == 'Fabric' %}selected{% endif %}>Fabric</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="mod_dependency">Зависимость:</label>
+                <select id="mod_dependency" name="mod_dependency" required>
+                    <option value="Без GeckoLib" {% if mod.get('dependency') == 'Без GeckoLib' %}selected{% endif %}>Без GeckoLib</option>
+                    <option value="С GeckoLib" {% if mod.get('dependency') == 'С GeckoLib' %}selected{% endif %}>С GeckoLib</option>
+                </select>
+            </div>
+        </div>
+
+        <label for="mod_description">Описание:</label>
+        <textarea id="mod_description" name="mod_description" rows="6" required>{{ mod.description }}</textarea>
+
+        <label for="video_url">Ссылка на видео (YouTube):</label>
+        <input type="url" id="video_url" name="video_url" value="{{ mod.video_url }}">
+
+        <hr style="border-color: var(--border-color); margin: 20px 0;">
+
+        <!-- НОВЫЙ БЛОК ДЛЯ ОБНОВЛЕНИЯ ФАЙЛА -->
+        <label for="mod_file">Заменить файл мода (необязательно):</label>
+        <p style="font-size: 0.8em; color: var(--text-color-secondary); margin-top: -15px;">Текущий файл: {{ mod.filename }}</p>
+        <input type="file" id="mod_file" name="mod_file" accept=".jar,.zip">
+        <p style="font-size: 0.8em; color: var(--text-color-secondary);">Если вы не выберете новый файл, старый останется.</p>
+
+        <button type="submit" class="btn" style="margin-top: 20px;">Сохранить изменения</button>
+    </form>
+</div>
+{% endblock %}

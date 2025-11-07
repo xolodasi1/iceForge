@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Профиль {{ session.username }}{% endblock %}
+
+{% block content %}
+<div class="profile-layout">
+    <!-- ЛЕВАЯ КОЛОНКА (САЙДБАР) -->
+    <aside class="profile-sidebar">
+        <div class="profile-avatar-wrapper">
+            {% if user.avatar == 'default.png' %}
+            <img src="{{ url_for('serve_default_avatar', filename=user.avatar) }}" alt="Аватар" class="profile-avatar">
+            {% else %}
+            <img src="{{ url_for('serve_avatar', username=session.username, filename=user.avatar) }}" alt="Аватар" class="profile-avatar">
+            {% endif %}
+
+            <!-- Скрытая форма для загрузки аватара -->
+            <form action="{{ url_for('update_avatar') }}" method="post" enctype="multipart/form-data" id="avatarForm">
+                <label for="avatar-upload" class="change-avatar-btn" title="Сменить аватар">+</label>
+                <input type="file" id="avatar-upload" name="avatar" accept="image/*" onchange="document.getElementById('avatarForm').submit()" hidden>
+            </form>
+        </div>
+
+        <div class="profile-info">
+            <h2>{{ session.username }}</h2>
+            <p>{{ user.description }}</p>
+        </div>
+
+        <div class="profile-stats">
+            <div class="stat-item">
+                <span>{{ mods|length }}</span>
+                <span>Публикаций</span>
+            </div>
+            <div class="stat-item">
+                <span>0</span>
+                <span>Комментариев</span>
+            </div>
+        </div>
+
+        <!-- Кнопка редактирования профиля (пока просто форма) -->
+        <form action="{{ url_for('update_account') }}" method="post">
+            <label for="description" style="display:none;">Описание</label>
+            <textarea name="description" id="description" rows="4" placeholder="Изменить описание...">{{ user.description }}</textarea>
+            <button type="submit" class="btn" style="width: 100%;">Сохранить</button>
+        </form>
+    </aside>
+
+    <!-- ПРАВАЯ КОЛОНКА (КОНТЕНТ) -->
+    <main class="profile-content">
+        <div class="profile-tabs">
+            <a href="#" class="active">Публикации</a>
+            <a href="#">Комментарии</a>
+        </div>
+        <div class="profile-content-inner">
+            {% if mods %}
+            <ul class="mod-list">
+                {% for mod in mods %}
+                <li>
+                    <a href="{{ url_for('mod_details', mod_id=mod.id) }}">{{ mod.name }} (v{{ mod.version }})</a>
+                    <div class="mod-actions">
+                        <a href="{{ url_for('edit_mod', mod_id=mod.id) }}" class="btn-small">Редактировать</a>
+                        <form action="{{ url_for('delete_mod', mod_id=mod.id) }}" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот мод?');">
+                            <button type="submit" class="btn-small btn-danger">Удалить</button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>Вы еще не загрузили ни одного мода.</p>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

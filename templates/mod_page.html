@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block title %}{{ mod.name }}{% endblock %}
+
+{% block content %}
+<div class="mod-details-container">
+    <div class="mod-header">
+        <h1>{{ mod.name }}</h1>
+        <p class="mod-meta">Автор: {{ mod.author }} | Версия: {{ mod.version }}</p>
+    </div>
+
+    <div class="mod-main-content">
+        <div class="mod-gallery">
+            <div class="slider-container">
+                <div class="slider-track">
+                    {% for image_filename in mod.image_filenames %}
+                    <div class="slide">
+                        <img src="{{ url_for('serve_image', username=mod.author, filename=image_filename) }}" alt="Скриншот мода {{ mod.name }}">
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if mod.image_filenames|length > 1 %}
+                <button class="slider-btn slider-prev">&lt;</button>
+                <button class="slider-btn slider-next">&gt;</button>
+                <div class="slider-dots"></div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mod-info">
+            <h2>Описание</h2>
+            <p>{{ mod.description }}</p>
+
+            <div class="download-info-box">
+                <div class="download-button-wrapper">
+                    <a href="{{ url_for('download_file', username=mod.author, filename=mod.filename) }}" class="btn download-btn">
+                        <span class="main-text">Скачать мод</span>
+                        <span class="sub-text">{{ mod.filename }}</span>
+                    </a>
+                </div>
+                <div class="download-details">
+                    <div class="detail-item">
+                        <strong>Загрузчик:</strong> <!-- НОВЫЙ БЛОК -->
+                        <span>{{ mod.get('loader', 'N/A') }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Версия:</strong>
+                        <span>{{ mod.version }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Размер:</strong>
+                        <span>{{ file_size }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Зависимость:</strong> <!-- НОВЫЙ БЛОК -->
+                        <span>{{ mod.get('dependency', 'N/A') }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Дата:</strong>
+                        <span>{{ mod.get('upload_date', 'Неизвестно') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if embed_url %}
+    <div class="video-section">
+        <h2>Видео-обзор</h2>
+        <div class="video-container">
+            <iframe src="{{ embed_url }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="comments-section">
+        <h2>Комментарии ({{ mod.comments|length }})</h2>
+        <div class="comments-list">
+            {% for comment in mod.comments %}
+            <div class="comment-card">
+                <p class="comment-author">{{ comment.author }}</p>
+                <p class="comment-text">{{ comment.text }}</p>
+            </div>
+            {% else %}
+            <p>Комментариев пока нет. Станьте первым!</p>
+            {% endfor %}
+        </div>
+
+        {% if session.username %}
+        <form action="{{ url_for('add_comment', mod_id=mod.id) }}" method="post" class="comment-form">
+            <h3>Оставить комментарий</h3>
+            <textarea name="comment_text" rows="4" placeholder="Введите ваш комментарий..." required></textarea>
+            <button type="submit" class="btn">Отправить</button>
+        </form>
+        {% else %}
+        <p>Чтобы оставить комментарий, пожалуйста, <a href="{{ url_for('login') }}">войдите в аккаунт</a>.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const track = document.querySelector('.slider-track');
+        if (!track) return;
+
+        const slides = Array.from(track.children);
+        const nextButton = document.querySelector('.slider-next');
+        const prevButton = document.querySelector('.slider-prev');
+        const dotsNav = document.querySelector('.slider-dots');
+
+        if (slides.length <= 1) return;
+
+        const slideWidth = slides[0].getBoundingClientRect().width;
+        let currentIndex = 0;
+
+        slides.forEach((slide, index) => {
+            const dot = document.createElement('button');
+            dot.classList.add('dot');
+            if (index === 0) dot.classList.add('active');
+            dotsNav.appendChild(dot);
+
+            dot.addEventListener('click', e => {
+                moveToSlide(index);
+            });
+        });
+
+        const dots = Array.from(dotsNav.children);
+
+        const moveToSlide = (targetIndex) => {
+            track.style.transform = 'translateX(-' + (slideWidth * targetIndex) + 'px)';
+
+            dots[currentIndex].classList.remove('active');
+            dots[targetIndex].classList.add('active');
+
+            currentIndex = targetIndex;
+            updateNavButtons();
+        };
+
+        const updateNavButtons = () => {
+            if (currentIndex === 0) {
+                prevButton.style.display = 'none';
+            } else {
+                prevButton.style.display = 'block';
+            }
+
+            if (currentIndex === slides.length - 1) {
+                nextButton.style.display = 'none';
+            } else {
+                nextButton.style.display = 'block';
+            }
+        };
+
+        nextButton.addEventListener('click', () => {
+            if (currentIndex < slides.length - 1) {
+                moveToSlide(currentIndex + 1);
+            }
+        });
+
+        prevButton.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                moveToSlide(currentIndex - 1);
+            }
+        });
+
+        moveToSlide(0);
+    });
+</script>
+{% endblock %}

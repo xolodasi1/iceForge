@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Загрузить мод{% endblock %}
+{% block content %}
+<div class="form-card">
+    <h1>Загрузить новый мод</h1>
+    <form id="uploadForm" class="upload-form" enctype="multipart/form-data">
+
+        <label for="mod_name">Название мода:</label>
+        <input type="text" id="mod_name" name="mod_name" required>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="mod_version">Версия Minecraft:</label>
+                <select id="mod_version" name="mod_version" required>
+                    <option value="1.20.1">1.20.1</option>
+                    <option value="1.19.4">1.19.4</option>
+                    <option value="1.19.2">1.19.2</option>
+                    <option value="1.18.2">1.18.2</option>
+                    <option value="1.16.5">1.16.5</option>
+                    <option value="1.12.2">1.12.2</option>
+                    <option value="1.7.10">1.7.10</option>
+                </select>
+            </div>
+            <!-- НОВЫЕ ПОЛЯ -->
+            <div class="form-group">
+                <label for="mod_loader">Загрузчик:</label>
+                <select id="mod_loader" name="mod_loader" required>
+                    <option value="Forge">Forge</option>
+                    <option value="Fabric">Fabric</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="mod_dependency">Зависимость:</label>
+                <select id="mod_dependency" name="mod_dependency" required>
+                    <option value="Без GeckoLib">Без GeckoLib</option>
+                    <option value="С GeckoLib">С GeckoLib</option>
+                </select>
+            </div>
+        </div>
+
+        <label for="mod_description">Описание:</label>
+        <textarea id="mod_description" name="mod_description" rows="6" required></textarea>
+
+        <label for="mod_file">Файл мода (.jar, .zip):</label>
+        <input type="file" id="mod_file" name="mod_file" accept=".jar,.zip" required>
+
+        <label for="mod_images">Изображения (скриншоты):</label>
+        <input type="file" id="mod_images" name="mod_images" accept="image/*" multiple required>
+
+        <label for="video_url">Ссылка на видео (YouTube):</label>
+        <input type="url" id="video_url" name="video_url" placeholder="https://www.youtube.com/watch?v=...">
+
+        <button type="submit" class="btn">Загрузить</button>
+        <div id="statusMessage"></div>
+    </form>
+</div>
+
+<script>
+    // JS-скрипт для асинхронной загрузки остается без изменений
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const statusDiv = document.getElementById('statusMessage');
+        statusDiv.textContent = 'Загрузка...';
+
+        fetch("{{ url_for('upload_page') }}", {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    statusDiv.textContent = 'Успешно! Перенаправление...';
+                    window.location.href = data.redirect_url;
+                } else {
+                    statusDiv.textContent = 'Ошибка: ' + data.message;
+                }
+            })
+            .catch(error => {
+                statusDiv.textContent = 'Сетевая ошибка. Попробуйте снова.';
+                console.error('Error:', error);
+            });
+    });
+</script>
+{% endblock %}

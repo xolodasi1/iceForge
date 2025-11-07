@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Каталог модов{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Каталог модов</h1>
+    <!-- Контейнер для всех фильтров -->
+    <form method="get" action="{{ url_for('index') }}" class="filters-container">
+        <!-- Фильтр по версии -->
+        <select name="version" onchange="this.form.submit()">
+            <option value="">Все версии</option>
+            {% for version in versions %}
+            <option value="{{ version }}" {% if version == selected_version %}selected{% endif %}>{{ version }}</option>
+            {% endfor %}
+        </select>
+        <!-- Фильтр по загрузчику -->
+        <select name="loader" onchange="this.form.submit()">
+            <option value="">Все загрузчики</option>
+            {% for loader in loaders %}
+            <option value="{{ loader }}" {% if loader == selected_loader %}selected{% endif %}>{{ loader }}</option>
+            {% endfor %}
+        </select>
+        <!-- Фильтр по зависимости -->
+        <select name="dependency" onchange="this.form.submit()">
+            <option value="">Все зависимости</option>
+            {% for dep in dependencies %}
+            <option value="{{ dep }}" {% if dep == selected_dependency %}selected{% endif %}>{{ dep }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<div class="mods-grid">
+    {% for mod in mods %}
+    <a href="{{ url_for('mod_details', mod_id=mod.id) }}" class="mod-card-link">
+        <div class="mod-card">
+            <img src="{{ url_for('serve_image', username=mod.author, filename=mod.image_filenames[0]) }}" alt="Изображение мода {{ mod.name }}">
+            <div class="mod-card-content">
+                <h2>{{ mod.name }}</h2>
+                <p>Автор: {{ mod.author }}</p>
+                <!-- НОВЫЙ БЛОК С ТЕГАМИ -->
+                <div class="mod-card-tags">
+                    {% if mod.get('loader') %}
+                    <span class="tag tag-loader-{{ mod.loader|lower }}">{{ mod.loader }}</span>
+                    {% endif %}
+                    <span class="tag tag-version">{{ mod.version }}</span>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% else %}
+    <p style="text-align: center; grid-column: 1 / -1;">
+        Модов по заданным фильтрам не найдено. <a href="{{ url_for('index') }}">Сбросить все фильтры</a>.
+    </p>
+    {% endfor %}
+</div>
+{% endblock %}
